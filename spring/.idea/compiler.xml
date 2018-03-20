@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="_main" target="1.8" />
+      <module name="_test" target="1.8" />
+      <module name="day-03-03-mvc_main" target="1.8" />
+      <module name="day-03-03-mvc_test" target="1.8" />
+      <module name="spring_main" target="1.8" />
+      <module name="spring_test" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

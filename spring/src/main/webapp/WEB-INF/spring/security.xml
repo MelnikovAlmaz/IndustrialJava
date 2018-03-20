@@ -1,0 +1,41 @@
+<b:beans xmlns:b="http://www.springframework.org/schema/beans"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://www.springframework.org/schema/security"
+         xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+						http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+
+
+    <global-method-security pre-post-annotations="enabled" secured-annotations="enabled"/>
+
+    <http>
+        <form-login login-page="/login"
+                    username-parameter="login"
+                    password-parameter="password"
+                    default-target-url="/"
+                    authentication-failure-url="/login?error"/>
+
+        <intercept-url pattern="/AddBook" access="hasRole('ROLE_LIB')"/>
+        <intercept-url pattern="/ViewBook" access="hasRole('ROLE_LIB')"/>
+        <intercept-url pattern="/ViewIssueBook" access="hasRole('ROLE_LIB')"/>
+        <intercept-url pattern="/IssueBook" access="hasRole('ROLE_LIB')"/>
+        <intercept-url pattern="/ReturnBook" access="hasRole('ROLE_LIB')"/>
+        <intercept-url pattern="/DeleteBook" access="hasRole('ROLE_LIB')"/>
+        <intercept-url pattern="/ViewLibrarian" access="hasRole('ROLE_ADMIN')"/>
+        <intercept-url pattern="/" access="permitAll()"/>
+        <intercept-url pattern="/login*" access="permitAll()"/>
+        <!--<intercept-url pattern="/login*"/>-->
+
+        <logout logout-url="/logout" logout-success-url="/login" invalidate-session="true"/>
+        <anonymous username="guest" granted-authority="ROLE_ANONYMOUS"/>
+        <remember-me/>
+    </http>
+
+
+    <user-service>
+        <user name="user" password="admin" authorities="ROLE_USER"/>
+        <user name="admin@admin.ru" password="admin" authorities="ROLE_ADMIN"/>
+        <user name="mi@admin.ru" password="admin" authorities="ROLE_LIB"/>
+    </user-service>
+
+</b:beans>
+
