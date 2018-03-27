@@ -1,6 +1,5 @@
 package model.dao.interfaces;
 
-import model.pojo.LibrarianBean;
-
-public interface LibrarianDAO extends DAO<LibrarianBean, Integer> {
+public interface LibrarianDAO {
+    boolean authenticate(String email, String password);
 }

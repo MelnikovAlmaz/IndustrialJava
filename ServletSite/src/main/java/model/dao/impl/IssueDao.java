@@ -21,8 +21,7 @@ public class IssueDao implements IssueDAO {
     @Override
     public List<IssueBookBean> getAll() {
         List<IssueBookBean> list = new ArrayList<IssueBookBean>();
-        try {
-            Connection con = DataSourceFactory.getDataSource().getConnection();
+        try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
             PreparedStatement ps = con.prepareStatement("select * from e_issuebook order by issueddate desc");
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -35,8 +34,6 @@ public class IssueDao implements IssueDAO {
                 bean.setReturnstatus(rs.getString("returnstatus"));
                 list.add(bean);
             }
-            con.close();
-
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -56,8 +53,7 @@ public class IssueDao implements IssueDAO {
         System.out.println("Check status: " + checkstatus);
         if (checkstatus) {
             int status = 0;
-            try {
-                Connection con = DataSourceFactory.getDataSource().getConnection();
+            try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
                 PreparedStatement ps = con.prepareStatement("insert into e_issuebook (callno, studentid, studentname, studentmobile, issueddate, returnstatus) values(?,?,?,?,?,?)");
                 ps.setString(1, bean.getCallno());
                 ps.setInt(2, bean.getStudentid());
@@ -74,8 +70,6 @@ public class IssueDao implements IssueDAO {
                     ps2.setString(2, callno);
                     status = ps2.executeUpdate();
                 }
-                con.close();
-
             } catch (Exception e) {
                 System.out.println(e);
             }
@@ -98,20 +92,37 @@ public class IssueDao implements IssueDAO {
 
     public static boolean checkIssue(String callno) {
         boolean status = false;
-        try {
-            Connection con = DataSourceFactory.getDataSource().getConnection();
+        try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
             PreparedStatement ps = con.prepareStatement("select * from e_book where callno=? and quantity>issued");
             ps.setString(1, callno);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 status = true;
             }
-            con.close();
-
         } catch (Exception e) {
             System.out.println(e);
         }
 
         return status;
+    }
+
+    @Override
+    public void returnBook(IssueBookBean entity) {
+        int status = 0;
+        try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
+            PreparedStatement ps = con.prepareStatement("update e_issuebook set returnstatus='yes' where callno=? and studentid=?");
+            ps.setString(1, entity.getCallno());
+            ps.setInt(2, entity.getStudentid());
+
+            status = ps.executeUpdate();
+            if (status > 0) {
+                PreparedStatement ps2 = con.prepareStatement("update e_book set issued=? where callno=?");
+                ps2.setInt(1, getIssuedById(entity.getCallno()) - 1);
+                ps2.setString(2, entity.getCallno());
+                status = ps2.executeUpdate();
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 }

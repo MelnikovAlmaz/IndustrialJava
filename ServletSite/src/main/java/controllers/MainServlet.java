@@ -15,10 +15,7 @@ import java.io.PrintWriter;
 public class MainServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
-        if (session.getAttribute("userLogin") == "admin") {
-            getServletContext().getRequestDispatcher("/adminMain.jsp").forward(request, response);
-        }
-        else if (session.getAttribute("userLogin") != "") {
+        if (session.getAttribute("userLogin") != "") {
             getServletContext().getRequestDispatcher("/librarianMain.jsp").forward(request, response);
         }
         else {

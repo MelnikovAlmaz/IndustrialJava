@@ -15,15 +15,7 @@
     </filter-mapping>
     <filter-mapping>
         <filter-name>WhiteFilter</filter-name>
-        <url-pattern>/AddLibrarian</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>WhiteFilter</filter-name>
         <url-pattern>/DeleteBook</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>WhiteFilter</filter-name>
-        <url-pattern>/DeleteLibrarian</url-pattern>
     </filter-mapping>
     <filter-mapping>
         <filter-name>WhiteFilter</filter-name>
@@ -37,14 +29,6 @@
         <filter-name>WhiteFilter</filter-name>
         <url-pattern>/ViewIssuedBook</url-pattern>
     </filter-mapping>
-    <filter-mapping>
-        <filter-name>WhiteFilter</filter-name>
-        <url-pattern>/ViewLibrarian</url-pattern>
-    </filter-mapping>
-    <context-param>
-        <param-name>admin_email</param-name>
-        <param-value>loggerffi1@gmail.com</param-value>
-    </context-param>
     <listener>
         <listener-class>controllers.listeners.AppStartListener</listener-class>
     </listener>

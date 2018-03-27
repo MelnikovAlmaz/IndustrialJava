@@ -10,13 +10,11 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class BookDao implements BookDAO {
     @Override
     public BookBean getById(String id) {
-        try {
-            BookBean bean = new BookBean();
-            Connection con = DataSourceFactory.getDataSource().getConnection();
+        BookBean bean = new BookBean();
+        try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
             PreparedStatement ps = con.prepareStatement("select * from e_book where callno=?");
             ps.setString(1, id);
             ResultSet rs = ps.executeQuery();
@@ -30,7 +28,6 @@ public class BookDao implements BookDAO {
                 bean.setIssued(rs.getInt("issued"));
 
             }
-            con.close();
             return bean;
         } catch (Exception e) {
             System.out.println(e);
@@ -41,8 +38,7 @@ public class BookDao implements BookDAO {
     @Override
     public List<BookBean> getAll() {
         List<BookBean> list = new ArrayList<BookBean>();
-        try {
-            Connection con = DataSourceFactory.getDataSource().getConnection();
+        try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
             PreparedStatement ps = con.prepareStatement("select * from e_book");
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -56,7 +52,6 @@ public class BookDao implements BookDAO {
 
                 list.add(bean);
             }
-            con.close();
 
         } catch (Exception e) {
             System.out.println(e);
@@ -73,8 +68,7 @@ public class BookDao implements BookDAO {
     @Override
     public String insert(BookBean bean) {
         int status = 0;
-        try {
-            Connection con = DataSourceFactory.getDataSource().getConnection();
+        try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
             PreparedStatement ps = con.prepareStatement("insert into e_book values(?,?,?,?,?,?)");
             ps.setString(1, bean.getCallno());
             ps.setString(2, bean.getName());
@@ -83,8 +77,6 @@ public class BookDao implements BookDAO {
             ps.setInt(5, bean.getQuantity());
             ps.setInt(6, 0);
             status = ps.executeUpdate();
-            con.close();
-
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -100,13 +92,10 @@ public class BookDao implements BookDAO {
     @Override
     public int delete(BookBean entity) {
         int status = 0;
-        try {
-            Connection con = DataSourceFactory.getDataSource().getConnection();
+        try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
             PreparedStatement ps = con.prepareStatement("delete from e_book where callno=?");
             ps.setString(1, entity.getCallno());
             status = ps.execute() ? 1 : 0;
-            con.close();
-
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -117,16 +106,13 @@ public class BookDao implements BookDAO {
 
     public static int getIssuedById(String callno) {
         int issued = 0;
-        try {
-            Connection con = DataSourceFactory.getDataSource().getConnection();
+        try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
             PreparedStatement ps = con.prepareStatement("select * from e_book where callno=?");
             ps.setString(1, callno);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 issued = rs.getInt("issued");
             }
-            con.close();
-
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -137,8 +123,7 @@ public class BookDao implements BookDAO {
 
     public static int returnBook(String callno, int studentid) {
         int status = 0;
-        try {
-            Connection con = DataSourceFactory.getDataSource().getConnection();
+        try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
             PreparedStatement ps = con.prepareStatement("update e_issuebook set returnstatus='yes' where callno=? and studentid=?");
             ps.setString(1, callno);
             ps.setInt(2, studentid);
@@ -150,8 +135,6 @@ public class BookDao implements BookDAO {
                 ps2.setString(2, callno);
                 status = ps2.executeUpdate();
             }
-            con.close();
-
         } catch (Exception e) {
             System.out.println(e);
         }

@@ -34,8 +34,7 @@
         <td>
             <form method="post" href='ReturnBook'>
                 <input type="submit" value="Вернуть"/>
-                <input type="hidden" name="callno" value="${book.callno}"/>
-                <input type="hidden" name="studentid" value="${book.studentid}"/>
+                <input type="hidden" name="id" value="${book.callno}"/>
             </form>
         </td>
     </tr>
