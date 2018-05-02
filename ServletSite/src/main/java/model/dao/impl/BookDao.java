@@ -3,61 +3,78 @@ package model.dao.impl;
 import model.dao.interfaces.BookDAO;
 import model.pojo.BookBean;
 import model.utils.DataSourceFactory;
+import model.utils.exceptions.DatabaseConnectionException;
+import model.utils.exceptions.EmptyResultException;
+import model.utils.exceptions.InvalidDataSchemeFormat;
+import model.utils.exceptions.UnsuccessfulExequtionException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BookDao implements BookDAO {
     @Override
-    public BookBean getById(String id) {
+    public BookBean getById(String id) throws DatabaseConnectionException, EmptyResultException, InvalidDataSchemeFormat {
         BookBean bean = new BookBean();
         try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
             PreparedStatement ps = con.prepareStatement("select * from e_book where callno=?");
             ps.setString(1, id);
             ResultSet rs = ps.executeQuery();
+
+            // Empty result
+            if (rs.getFetchSize() == 0){
+                throw new EmptyResultException();
+            }
+
             if (rs.next()) {
-
-                bean.setCallno(rs.getString("callno"));
-                bean.setName(rs.getString("name"));
-                bean.setAuthor(rs.getString("author"));
-                bean.setPublisher(rs.getString("publisher"));
-                bean.setQuantity(rs.getInt("quantity"));
-                bean.setIssued(rs.getInt("issued"));
-
+                try{
+                    bean.setCallno(rs.getString("callno"));
+                    bean.setName(rs.getString("name"));
+                    bean.setAuthor(rs.getString("author"));
+                    bean.setPublisher(rs.getString("publisher"));
+                    bean.setQuantity(rs.getInt("quantity"));
+                    bean.setIssued(rs.getInt("issued"));
+                }
+                catch (SQLException e){
+                    throw new InvalidDataSchemeFormat(e);
+                }
             }
             return bean;
-        } catch (Exception e) {
-            System.out.println(e);
-            return null;
+        } catch (SQLException e) {
+            throw new DatabaseConnectionException(e);
         }
     }
 
     @Override
-    public List<BookBean> getAll() {
+    public List<BookBean> getAll() throws DatabaseConnectionException, InvalidDataSchemeFormat {
         List<BookBean> list = new ArrayList<BookBean>();
         try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
             PreparedStatement ps = con.prepareStatement("select * from e_book");
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 BookBean bean = new BookBean();
-                bean.setCallno(rs.getString("callno"));
-                bean.setName(rs.getString("name"));
-                bean.setAuthor(rs.getString("author"));
-                bean.setPublisher(rs.getString("publisher"));
-                bean.setQuantity(rs.getInt("quantity"));
-                bean.setIssued(rs.getInt("issued"));
+                try{
+                    bean.setCallno(rs.getString("callno"));
+                    bean.setName(rs.getString("name"));
+                    bean.setAuthor(rs.getString("author"));
+                    bean.setPublisher(rs.getString("publisher"));
+                    bean.setQuantity(rs.getInt("quantity"));
+                    bean.setIssued(rs.getInt("issued"));
+                }
+                catch (SQLException e){
+                    throw new InvalidDataSchemeFormat(e);
+                }
 
                 list.add(bean);
             }
 
-        } catch (Exception e) {
-            System.out.println(e);
+            return list;
+        } catch (SQLException e) {
+            throw new DatabaseConnectionException(e);
         }
-
-        return list;
     }
 
     @Override
@@ -66,8 +83,7 @@ public class BookDao implements BookDAO {
     }
 
     @Override
-    public String insert(BookBean bean) {
-        int status = 0;
+    public String insert(BookBean bean) throws DatabaseConnectionException, UnsuccessfulExequtionException {
         try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
             PreparedStatement ps = con.prepareStatement("insert into e_book values(?,?,?,?,?,?)");
             ps.setString(1, bean.getCallno());
@@ -76,12 +92,14 @@ public class BookDao implements BookDAO {
             ps.setString(4, bean.getPublisher());
             ps.setInt(5, bean.getQuantity());
             ps.setInt(6, 0);
-            status = ps.executeUpdate();
-        } catch (Exception e) {
-            System.out.println(e);
+            if(ps.executeUpdate() == 1){
+                return bean.getCallno();
+            } else {
+                throw new UnsuccessfulExequtionException();
+            }
+        } catch (SQLException e) {
+            throw new DatabaseConnectionException(e);
         }
-
-        return bean.getCallno();
     }
 
     @Override
@@ -90,55 +108,34 @@ public class BookDao implements BookDAO {
     }
 
     @Override
-    public int delete(BookBean entity) {
-        int status = 0;
+    public int delete(BookBean entity) throws DatabaseConnectionException, UnsuccessfulExequtionException {
         try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
             PreparedStatement ps = con.prepareStatement("delete from e_book where callno=?");
             ps.setString(1, entity.getCallno());
-            status = ps.execute() ? 1 : 0;
-        } catch (Exception e) {
-            System.out.println(e);
+            if (ps.execute()){
+                return 1;
+            }
+            else {
+                throw new UnsuccessfulExequtionException();
+            }
+        } catch (SQLException e) {
+            throw new DatabaseConnectionException(e);
         }
-
-        return status;
     }
 
 
-    public static int getIssuedById(String callno) {
-        int issued = 0;
+    public static int getIssuedById(String callno) throws DatabaseConnectionException, EmptyResultException {
         try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
             PreparedStatement ps = con.prepareStatement("select * from e_book where callno=?");
             ps.setString(1, callno);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                issued = rs.getInt("issued");
+                return rs.getInt("issued");
+            } else {
+                throw new EmptyResultException();
             }
-        } catch (Exception e) {
-            System.out.println(e);
+        } catch (SQLException e) {
+            throw new DatabaseConnectionException(e);
         }
-
-        return issued;
-    }
-
-
-    public static int returnBook(String callno, int studentid) {
-        int status = 0;
-        try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
-            PreparedStatement ps = con.prepareStatement("update e_issuebook set returnstatus='yes' where callno=? and studentid=?");
-            ps.setString(1, callno);
-            ps.setInt(2, studentid);
-
-            status = ps.executeUpdate();
-            if (status > 0) {
-                PreparedStatement ps2 = con.prepareStatement("update e_book set issued=? where callno=?");
-                ps2.setInt(1, getIssuedById(callno) - 1);
-                ps2.setString(2, callno);
-                status = ps2.executeUpdate();
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-
-        return status;
     }
 }

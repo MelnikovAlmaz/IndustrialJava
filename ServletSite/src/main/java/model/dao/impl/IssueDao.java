@@ -3,10 +3,14 @@ package model.dao.impl;
 import model.dao.interfaces.IssueDAO;
 import model.pojo.IssueBookBean;
 import model.utils.DataSourceFactory;
+import model.utils.exceptions.DatabaseConnectionException;
+import model.utils.exceptions.InvalidDataSchemeFormat;
+import model.utils.exceptions.UnsuccessfulExequtionException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,26 +23,30 @@ public class IssueDao implements IssueDAO {
     }
 
     @Override
-    public List<IssueBookBean> getAll() {
+    public List<IssueBookBean> getAll() throws DatabaseConnectionException, InvalidDataSchemeFormat {
         List<IssueBookBean> list = new ArrayList<IssueBookBean>();
         try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
             PreparedStatement ps = con.prepareStatement("select * from e_issuebook order by issueddate desc");
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 IssueBookBean bean = new IssueBookBean();
-                bean.setCallno(rs.getString("callno"));
-                bean.setStudentid(rs.getInt("studentid"));
-                bean.setStudentname(rs.getString("studentname"));
-                bean.setStudentmobile(rs.getLong("studentmobile"));
-                bean.setIssueddate(rs.getDate("issueddate"));
-                bean.setReturnstatus(rs.getString("returnstatus"));
+                try {
+                    bean.setCallno(rs.getString("callno"));
+                    bean.setStudentid(rs.getInt("studentid"));
+                    bean.setStudentname(rs.getString("studentname"));
+                    bean.setStudentmobile(rs.getLong("studentmobile"));
+                    bean.setIssueddate(rs.getDate("issueddate"));
+                    bean.setReturnstatus(rs.getString("returnstatus"));
+                }
+                catch (SQLException e){
+                    throw new InvalidDataSchemeFormat(e);
+                }
                 list.add(bean);
             }
-        } catch (Exception e) {
-            System.out.println(e);
+            return list;
+        } catch (SQLException e) {
+            throw new DatabaseConnectionException(e);
         }
-
-        return list;
     }
 
     @Override
@@ -47,11 +55,9 @@ public class IssueDao implements IssueDAO {
     }
 
     @Override
-    public String insert(IssueBookBean bean) {
+    public String insert(IssueBookBean bean) throws DatabaseConnectionException, UnsuccessfulExequtionException {
         String callno = bean.getCallno();
-        boolean checkstatus = checkIssue(callno);
-        System.out.println("Check status: " + checkstatus);
-        if (checkstatus) {
+        if (checkIssue(callno)) {
             int status = 0;
             try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
                 PreparedStatement ps = con.prepareStatement("insert into e_issuebook (callno, studentid, studentname, studentmobile, issueddate, returnstatus) values(?,?,?,?,?,?)");
@@ -69,9 +75,11 @@ public class IssueDao implements IssueDAO {
                     ps2.setInt(1, getIssuedById(callno) + 1);
                     ps2.setString(2, callno);
                     status = ps2.executeUpdate();
+                } else {
+                    throw  new UnsuccessfulExequtionException();
                 }
-            } catch (Exception e) {
-                System.out.println(e);
+            } catch (SQLException e) {
+                throw new DatabaseConnectionException(e);
             }
 
             return callno;
@@ -90,7 +98,7 @@ public class IssueDao implements IssueDAO {
         return 0;
     }
 
-    public static boolean checkIssue(String callno) {
+    public static boolean checkIssue(String callno) throws DatabaseConnectionException {
         boolean status = false;
         try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
             PreparedStatement ps = con.prepareStatement("select * from e_book where callno=? and quantity>issued");
@@ -99,8 +107,8 @@ public class IssueDao implements IssueDAO {
             if (rs.next()) {
                 status = true;
             }
-        } catch (Exception e) {
-            System.out.println(e);
+        } catch (SQLException e) {
+            throw new DatabaseConnectionException(e);
         }
 
         return status;
