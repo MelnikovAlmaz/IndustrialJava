@@ -81,9 +81,6 @@ public class BookBeanServiceImpl implements BookBeanService {
         } catch (DatabaseConnectionException e) {
             LOGGER.warn("Class - " + getClass().getName() + ". Database connection error!");
             return 0;
-        } catch (UnsuccessfulExequtionException e) {
-            LOGGER.warn("Class - " + getClass().getName() + ". delete(BookBean entity) unsuccessful execution!");
-            return 0;
         }
     }
 }

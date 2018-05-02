@@ -25,9 +25,6 @@ public class BookDao implements BookDAO {
             ResultSet rs = ps.executeQuery();
 
             // Empty result
-            if (rs.getFetchSize() == 0){
-                throw new EmptyResultException();
-            }
 
             if (rs.next()) {
                 try{
@@ -108,16 +105,12 @@ public class BookDao implements BookDAO {
     }
 
     @Override
-    public int delete(BookBean entity) throws DatabaseConnectionException, UnsuccessfulExequtionException {
+    public int delete(BookBean entity) throws DatabaseConnectionException {
         try (Connection con = DataSourceFactory.getDataSource().getConnection()) {
             PreparedStatement ps = con.prepareStatement("delete from e_book where callno=?");
             ps.setString(1, entity.getCallno());
-            if (ps.execute()){
-                return 1;
-            }
-            else {
-                throw new UnsuccessfulExequtionException();
-            }
+            ps.execute();
+            return 1;
         } catch (SQLException e) {
             throw new DatabaseConnectionException(e);
         }

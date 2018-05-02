@@ -23,5 +23,5 @@ public interface DAO<E, PK> {
 
     int update(E entity);
 
-    int delete(E entity) throws DatabaseConnectionException, UnsuccessfulExequtionException;
+    int delete(E entity) throws DatabaseConnectionException;
 }
