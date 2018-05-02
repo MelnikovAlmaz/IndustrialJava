@@ -1,6 +1,7 @@
 package ru.stc.services;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.stc.controllers.listeners.AppStartListener;
 import ru.stc.exceptions.DatabaseConnectionException;
@@ -11,11 +12,8 @@ import ru.stc.model.pojo.LibrarianBean;
 @Service
 public class LibrarianServiceImpl implements LibrarianService<LibrarianBean, Integer> {
     private static final Logger LOGGER = Logger.getLogger(AppStartListener.class);
-    private final LibrarianDAO librarianDAO;
-
-    public LibrarianServiceImpl() {
-        this.librarianDAO = new LibrarianDao();
-    }
+    @Autowired
+    private LibrarianDAO librarianDAO;
 
     @Override
     public boolean authenticate(String email, String password) {

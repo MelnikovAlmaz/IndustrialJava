@@ -1,6 +1,7 @@
 package ru.stc.services;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.stc.controllers.listeners.AppStartListener;
 import ru.stc.exceptions.DatabaseConnectionException;
@@ -15,11 +16,8 @@ import java.util.List;
 @Service
 public class IssueServiceImpl implements IssueService<IssueBookBean, String> {
     private static final Logger LOGGER = Logger.getLogger(AppStartListener.class);
-    private final IssueDAO issueDAO;
-
-    public IssueServiceImpl() {
-        this.issueDAO = new IssueDao();
-    }
+    @Autowired
+    private IssueDAO issueDAO;
 
     @Override
     public List<IssueBookBean> getAll() {

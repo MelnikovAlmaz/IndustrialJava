@@ -1,6 +1,7 @@
 package ru.stc.services;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.stc.controllers.listeners.AppStartListener;
 import ru.stc.exceptions.DatabaseConnectionException;
@@ -16,11 +17,8 @@ import java.util.List;
 @Service
 public class BookBeanServiceImpl implements BookBeanService {
     private static final Logger LOGGER = Logger.getLogger(AppStartListener.class);
-    private final BookDAO bookDAO;
-
-    public BookBeanServiceImpl() {
-        this.bookDAO = new BookDao();
-    }
+    @Autowired
+    private BookDAO bookDAO;
 
     @Override
     public BookBean getById(String id) {
