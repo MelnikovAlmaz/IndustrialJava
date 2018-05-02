@@ -1,52 +1,50 @@
 package ru.stc.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
+import ru.stc.controllers.listeners.AppStartListener;
+import ru.stc.exceptions.DatabaseConnectionException;
+import ru.stc.exceptions.InvalidDataSchemeFormat;
+import ru.stc.exceptions.UnsuccessfulExequtionException;
+import ru.stc.model.dao.impl.IssueDao;
 import ru.stc.model.dao.interfaces.IssueDAO;
-import ru.stc.model.pojo.IssueBookBean;
 import ru.stc.model.pojo.IssueBookBean;
 
 import java.util.List;
 
 @Service
 public class IssueServiceImpl implements IssueService<IssueBookBean, String> {
+    private static final Logger LOGGER = Logger.getLogger(AppStartListener.class);
     private final IssueDAO issueDAO;
 
-    @Autowired
-    public IssueServiceImpl(IssueDAO issueDAO) {
-        this.issueDAO = issueDAO;
-    }
-
-    @Override
-    public IssueBookBean getById(String id) {
-        return issueDAO.getById(id);
+    public IssueServiceImpl() {
+        this.issueDAO = new IssueDao();
     }
 
     @Override
     public List<IssueBookBean> getAll() {
-        return issueDAO.getAll();
-    }
-
-    @Override
-    public IssueBookBean save(IssueBookBean entity) {
-        return issueDAO.save(entity);
+        try {
+            return issueDAO.getAll();
+        } catch (DatabaseConnectionException e) {
+            LOGGER.warn("Class - " + getClass().getName() + ". Database connection error!");
+            return null;
+        } catch (InvalidDataSchemeFormat throwables) {
+            LOGGER.warn("Class - " + getClass().getName() + ". IssueBook table has invalid scheme!");
+            return null;
+        }
     }
 
     @Override
     public String insert(IssueBookBean entity) {
-        return issueDAO.insert(entity);
-    }
-
-    @Override
-    public int update(IssueBookBean entity) {
-        issueDAO.update(entity);
-        return 1;
-    }
-
-    @Override
-    public int delete(IssueBookBean entity) {
-        issueDAO.delete(entity);
-        return 1;
+        try {
+            return issueDAO.insert(entity);
+        } catch (DatabaseConnectionException e) {
+            LOGGER.warn("Class - " + getClass().getName() + ". Database connection error!");
+            return null;
+        } catch (UnsuccessfulExequtionException e) {
+            LOGGER.warn("Class - " + getClass().getName() + ". insert(IssueBookBean entity) unsuccessful execution!");
+            return null;
+        }
     }
 
     @Override

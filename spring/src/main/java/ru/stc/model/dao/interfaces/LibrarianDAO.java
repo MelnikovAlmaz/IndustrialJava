@@ -1,9 +1,7 @@
 package ru.stc.model.dao.interfaces;
 
-import org.springframework.stereotype.Repository;
-import ru.stc.model.pojo.LibrarianBean;
+import ru.stc.exceptions.DatabaseConnectionException;
 
-@Repository
-public interface LibrarianDAO extends DAO<LibrarianBean, Integer> {
-    boolean authenticate(String email, String password);
+public interface LibrarianDAO {
+    boolean authenticate(String email, String password) throws DatabaseConnectionException;
 }

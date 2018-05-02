@@ -9,11 +9,7 @@ public interface BookBeanService {
 
     List<BookBean> getAll();
 
-    BookBean save(BookBean entity);
-
     String insert(BookBean entity);
-
-    int update(BookBean entity);
 
     int delete(BookBean entity);
 }
