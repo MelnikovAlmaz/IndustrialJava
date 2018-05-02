@@ -27,7 +27,7 @@ public class ServiceTest {
     }
 
     @Test
-    public void bookDAOTest() throws DatabaseConnectionException, InvalidDataSchemeFormat, UnsuccessfulExequtionException, EmptyResultException {
+    public void bookServiceTest() throws DatabaseConnectionException, InvalidDataSchemeFormat, UnsuccessfulExequtionException, EmptyResultException {
         // Check insert method
         assert (bookBeanService.insert(book).equals("9999"));
         // Check returning all books
@@ -40,7 +40,7 @@ public class ServiceTest {
     }
 
     @Test
-    public void issueBookDAOTest() throws DatabaseConnectionException, InvalidDataSchemeFormat, UnsuccessfulExequtionException, EmptyResultException {
+    public void issueBookServiceTest() throws DatabaseConnectionException, InvalidDataSchemeFormat, UnsuccessfulExequtionException, EmptyResultException {
         // Prepare environment
         bookBeanService.insert(book);
 
